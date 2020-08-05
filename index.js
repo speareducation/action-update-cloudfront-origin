@@ -12,7 +12,7 @@ const handle = async () => {
         env: process.env,
     });
     const project = github.context.repo.repo || null;
-    const branch = github.context.ref.replace('refs/heads', '')
+    const branch = github.context.ref.replace('refs/heads/', '')
     const environment = branch.split('/')[1] || null;
 
     if (!distributions[environment]) {
