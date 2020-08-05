@@ -8,6 +8,7 @@ const handle = async () => {
     const originId = core.getInput('originId');
     console.log({
         context: github.context,
+        repo: github.context.repo,
         env: process.env,
     });
     const project = github.context.repo.repo.split('/')[1] || null;
