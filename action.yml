@@ -1,0 +1,14 @@
+name: 'Update CloudFront Origin'
+description: 'Updates the CloudFront Origin and invalidates the cache'
+inputs:
+  distributions:
+    description: JSON map of origins mapped to release branch
+    required: true
+    default: '{}'
+  originId:
+    description: The Origin ID to replace
+    required: false
+    default: S3-spear-static-sites
+runs:
+  using: 'node12'
+  main: 'index.js'
