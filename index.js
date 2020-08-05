@@ -6,7 +6,11 @@ const cloudfront = new AWS.CloudFront();
 const handle = async () => {
     const distributions = JSON.parse(core.getInput('distributions'));
     const originId = core.getInput('originId');
-    const project = github.context.repository.split('/')[1] || null;
+    console.log({
+        context: github.context,
+        env: process.env,
+    });
+    const project = github.context.repo.repo.split('/')[1] || null;
     const branch = github.context.env.replace('refs/heads', '')
     const environment = branch.split('/')[1] || null;
 
@@ -51,7 +55,7 @@ const handle = async () => {
 
 
 try {
-    handle();
+    handle().catch(error => core.setFailed(error.message));
 } catch (error) {
     core.setFailed(error.message);
 }
