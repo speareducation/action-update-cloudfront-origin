@@ -6,7 +6,7 @@ const cloudfront = new AWS.CloudFront();
 const handle = async () => {
     const distributions = JSON.parse(core.getInput('distributions'));
     const originId = core.getInput('originId');
-    const project = github.context.repo.split('/')[1] || null;
+    const project = github.context.repository.split('/')[1] || null;
     const branch = github.context.env.replace('refs/heads', '')
     const environment = branch.split('/')[1] || null;
 
