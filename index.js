@@ -21,19 +21,20 @@ const handle = async () => {
     }
 
     // get old configuration
-    const oldConfig = await cloudfront.getDistributionConfig({ Id: distributions[environment] }).promise();
+    const result = await cloudfront.getDistributionConfig({ Id: distributions[environment] }).promise();
+    const { ETag, DistributionConfig } = result
     
     // upload configuration with new OriginPath
     // For help with this, see ./example-cloudfront-config.json
     // or use aws-spear cloudfront get-distribution-config --id= "<DIST ID>" | tee
     await cloudfront.updateDistribution({
         Id: distributions[environment],
-        IfMatch: oldConfig.ETag,
+        IfMatch: ETag,
         DistributionConfig: {
-            ...oldConfig.DistributionConfig,
+            ...DistributionConfig,
             Origins: {
-                ...oldConfig.DistributionConfig.Origins,
-                Items: oldConfig.DistributionConfig.Origins.map(origin => origin.Id !== originId ? origin : {
+                ...DistributionConfig.Origins,
+                Items: DistributionConfig.Origins.Items.map(origin => origin.Id !== originId ? origin : {
                     ...origin,
                     OriginPath: `${project}/${branch}`
                 })
