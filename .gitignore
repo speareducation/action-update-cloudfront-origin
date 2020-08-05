@@ -2,8 +2,6 @@
 .DS_Store
 /nbproject
 error_log
-/node_modules
-/packages
 npm-debug.log
 yarn-error.log
 .eslintcache
