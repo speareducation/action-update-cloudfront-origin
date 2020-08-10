@@ -24,20 +24,17 @@ const handle = async () => {
     // For help with this, see ./example-cloudfront-config.json
     // or use aws-spear cloudfront get-distribution-config --id= "<DIST ID>" | tee
     console.log('Updating Distribution');
-    await cloudfront.updateDistribution({
+    const originIndex = DistributionConfig.Origins.Items.findIndex(item => item.Id === originId);
+    if (originIndex !== -1) {
+        DistributionConfig.Origins.Items[originIndex].OriginPath = `/${project}/${branch}`;
+    }
+
+    const updateResult = await cloudfront.updateDistribution({
         Id: distributions[environment],
         IfMatch: ETag,
-        DistributionConfig: {
-            ...DistributionConfig,
-            Origins: {
-                ...DistributionConfig.Origins,
-                Items: DistributionConfig.Origins.Items.map(origin => origin.Id !== originId ? origin : {
-                    ...origin,
-                    OriginPath: `/${project}/${branch}`
-                })
-            }
-        }
+        DistributionConfig,
     });
+    console.log('New Configuration', updateResult);
 
     // invalidate the cache
     console.log('Invalidating Cache')
