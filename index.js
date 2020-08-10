@@ -35,7 +35,7 @@ const handle = async () => {
     await cloudfront.updateDistribution({
         Id: distributions[environment],
         DistributionConfig,
-    });
+    }).promise();
 
     // invalidate the cache
     console.log('Invalidating Cache')
