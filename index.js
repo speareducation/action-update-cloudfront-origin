@@ -18,7 +18,7 @@ const handle = async () => {
     // get old configuration
     console.log('Fetching old Distribution')
     const result = await cloudfront.getDistributionConfig({ Id: distributions[environment] }).promise();
-    const { ETag, DistributionConfig } = result
+    const { DistributionConfig } = result
     
     // upload configuration with new OriginPath
     // For help with this, see ./example-cloudfront-config.json
@@ -34,7 +34,6 @@ const handle = async () => {
 
     await cloudfront.updateDistribution({
         Id: distributions[environment],
-        IfMatch: ETag,
         DistributionConfig,
     });
 
