@@ -29,7 +29,7 @@ const handle = async () => {
     if (originIndex !== -1) {
         console.log('Old Origin Path', DistributionConfig.Origins.Items[originIndex].OriginPath);
         DistributionConfig.Origins.Items[originIndex].OriginPath = `/${project}/${branch}`;
-        console.log('New Origin Path', `/${project}/${branch}`);
+        console.log('New Origin Path', DistributionConfig.Origins.Items[originIndex].OriginPath);
     }
 
     await cloudfront.updateDistribution({
