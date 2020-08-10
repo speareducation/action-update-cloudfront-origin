@@ -33,7 +33,7 @@ const handle = async () => {
                 ...DistributionConfig.Origins,
                 Items: DistributionConfig.Origins.Items.map(origin => origin.Id !== originId ? origin : {
                     ...origin,
-                    OriginPath: `${project}/${branch}`
+                    OriginPath: `/${project}/${branch}`
                 })
             }
         }
