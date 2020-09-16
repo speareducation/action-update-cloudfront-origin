@@ -65,11 +65,13 @@ const handle = async () => {
         console.log('New Origin Path', DistributionConfig.Origins.Items[originIndex].OriginPath);
     }
 
-    await cloudfront.updateDistribution({
+    const newDistribution = await cloudfront.updateDistribution({
         Id: distributions[environment],
         IfMatch: ETag,
         DistributionConfig,
     }).promise();
+
+    console.log({ newDistribution });
 
     // Wait for distribution to be marked as "Deployed",
     await isDistributionDeployed({ Id: distributions[environment], ETag })
