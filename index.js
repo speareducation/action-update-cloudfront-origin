@@ -8,28 +8,34 @@ const sleep = (seconds) => new Promise(resolve => setTimeout(resolve(), seconds 
 /**
  * Waits for distribution to deploy
  * Throws an exception if another deployment occurs while we wait.
- * @param {} param0 
+ * @param {Object} {Id, ETag} 
+ * @return true
+ * @throws Error
  */
 const isDistributionDeployed = async ({ Id, ETag }) => {
     const sleepInterval = 5; // seconds
     let waitTime = 60 * 20; // 20 minute max wait
     while ((waitTime -= sleepInterval) >= 0) {
-        const result = await cloudfront.getDistributionConfig({ Id: distributions[environment] }).promise();
+        await sleep(sleepInterval);
+        console.log(new Date().toJSON(), `Checking if distribution is deployed`, { Id, ETag });
+        const result = await cloudfront.getDistribution({ Id }).promise();
         if (result.ETag !== ETag) {
             throw new Error('Whoops! It looks like someone else deployed while we were waiting for CloudFront to update.');
         }
 
         if (result.Distribution.Status === 'Deployed') {
+            console.log('Distribution deployed!');
             return true;
         }
 
-        console.log(new Date().toJSON(), `Waiting for distribution to deploy`, { Id, ETag });
-        await sleep(sleepInterval);
     }
 
     throw new Error(`Failed to deploy. Distribution took too long to update.`, { Id, ETag });
 }
 
+/**
+ * Main handler
+ */
 const handle = async () => {
     const distributions = JSON.parse(core.getInput('distributions'));
     const originId = core.getInput('originId');
