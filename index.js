@@ -3,7 +3,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const cloudfront = new AWS.CloudFront();
 
-const sleep = (seconds) => new Promise(resolve => setTimeout(resolve(), seconds * 1000));
+const sleep = (seconds) => new Promise(resolve => setTimeout(() => resolve(), seconds * 1000));
 
 /**
  * Waits for distribution to deploy
@@ -93,7 +93,8 @@ const handle = async () => {
 
 
 try {
-    handle().catch(error => core.setFailed(JSON.stringify(error)));
+    handle().catch(error => core.setFailed(error.message));
 } catch (error) {
-    core.setFailed(JSON.stringify(error));
+    console.error(error);
+    core.setFailed(error.message);
 }
