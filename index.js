@@ -93,7 +93,8 @@ const handle = async () => {
 
 
 try {
-    handle().catch(error => core.setFailed(error.message));
+    handle();
 } catch (error) {
+    console.error(error);
     core.setFailed(error.message);
 }
