@@ -3,6 +3,33 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const cloudfront = new AWS.CloudFront();
 
+const sleep = (seconds) => new Promise(resolve => setTimeout(resolve(), seconds * 1000));
+
+/**
+ * Waits for distribution to deploy
+ * Throws an exception if another deployment occurs while we wait.
+ * @param {} param0 
+ */
+const isDistributionDeployed = async ({ Id, ETag }) => {
+    const sleepInterval = 5; // seconds
+    let waitTime = 60 * 20; // 20 minute max wait
+    while ((waitTime -= sleepInterval) >= 0) {
+        const result = await cloudfront.getDistributionConfig({ Id: distributions[environment] }).promise();
+        if (result.ETag !== ETag) {
+            throw new Error('Whoops! It looks like someone else deployed while we were waiting for CloudFront to update.');
+        }
+
+        if (result.Distribution.Status === 'Deployed') {
+            return true;
+        }
+
+        console.log(new Date().toJSON(), `Waiting for distribution to deploy`, { Id, ETag });
+        await sleep(sleepInterval);
+    }
+
+    throw new Error(`Failed to deploy. Distribution took too long to update.`, { Id, ETag });
+}
+
 const handle = async () => {
     const distributions = JSON.parse(core.getInput('distributions'));
     const originId = core.getInput('originId');
@@ -38,6 +65,9 @@ const handle = async () => {
         DistributionConfig,
     }).promise();
 
+    // Wait for distribution to be marked as "Deployed",
+    await isDistributionDeployed({ Id: distributions[environment], ETag })
+
     // invalidate the cache
     console.log('Invalidating Cache')
     await cloudfront.createInvalidation({
@@ -52,6 +82,7 @@ const handle = async () => {
     }).promise();
 
     console.log('Done!');
+
 };
 
 
