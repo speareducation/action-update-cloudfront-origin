@@ -17,7 +17,7 @@ const isDistributionDeployed = async ({ Id, ETag }) => {
     let waitTime = 60 * 20; // 20 minute max wait
     while ((waitTime -= sleepInterval) >= 0) {
         await sleep(sleepInterval);
-        console.log(new Date().toJSON(), `Checking if distribution is deployed`, { Id, ETag });
+        console.log(new Date().toJSON(), `Checking if distribution is deployed`, { Id, ETag, waitTime });
         const result = await cloudfront.getDistribution({ Id }).promise();
         if (result.ETag !== ETag) {
             throw new Error('Whoops! It looks like someone else deployed while we were waiting for CloudFront to update.');
