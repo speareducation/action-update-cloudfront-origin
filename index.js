@@ -93,8 +93,7 @@ const handle = async () => {
 
 
 try {
-    handle();
+    handle().catch(error => core.setFailed(JSON.stringify(error)));
 } catch (error) {
-    console.error(error);
-    core.setFailed(error.message);
+    core.setFailed(JSON.stringify(error));
 }
