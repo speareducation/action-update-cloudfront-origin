@@ -65,16 +65,14 @@ const handle = async () => {
         console.log('New Origin Path', DistributionConfig.Origins.Items[originIndex].OriginPath);
     }
 
-    const newDistribution = await cloudfront.updateDistribution({
+    const newConfig = await cloudfront.updateDistribution({
         Id: distributions[environment],
         IfMatch: ETag,
         DistributionConfig,
     }).promise();
 
-    console.log({ newDistribution });
-
     // Wait for distribution to be marked as "Deployed",
-    await isDistributionDeployed({ Id: distributions[environment], ETag })
+    await isDistributionDeployed({ Id: newConfig.Distribution.Id, ETag: newConfig.ETag })
 
     // invalidate the cache
     console.log('Invalidating Cache')
