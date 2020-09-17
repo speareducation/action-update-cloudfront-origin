@@ -13,7 +13,7 @@ const sleep = (seconds) => new Promise(resolve => setTimeout(() => resolve(), se
  * @throws Error
  */
 const isDistributionDeployed = async ({ Id, ETag }) => {
-    const sleepInterval = 5; // seconds
+    const sleepInterval = 15; // seconds
     let waitTime = 60 * 20; // 20 minute max wait
     while ((waitTime -= sleepInterval) >= 0) {
         await sleep(sleepInterval);
