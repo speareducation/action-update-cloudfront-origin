@@ -39,7 +39,7 @@ const isDistributionDeployed = async ({ Id, ETag }) => {
 const handle = async () => {
     const distributions = JSON.parse(core.getInput('distributions'));
     const originId = core.getInput('originId');
-    const project = github.context.repo.repo || null;
+    const project = core.getInput('projectKey') || github.context.repo.repo || null;
     const branch = github.context.ref.replace('refs/heads/', '')
     const environment = branch.split('/')[1] || null;
 
