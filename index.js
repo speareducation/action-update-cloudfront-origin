@@ -42,7 +42,7 @@ const handle = async () => {
     const project = core.getInput('projectKey') || github.context.repo.repo || null;
 
     const releaseTag = github.context.ref.replace(/^refs\/(heads|tags)\//, '')
-    const [ nulltext1, appEnv, release ] = tag.split('/');
+    const [ nulltext1, appEnv, release ] = releaseTag.split('/');
 
     if (!distributions[appEnv]) {
         console.log(`Exiting. No Distribution ID defined for '${appEnv}'`)
