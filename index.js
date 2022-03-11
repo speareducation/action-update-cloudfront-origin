@@ -40,33 +40,34 @@ const handle = async () => {
     const distributions = JSON.parse(core.getInput('distributions'));
     const originId = core.getInput('originId');
     const project = core.getInput('projectKey') || github.context.repo.repo || null;
-    const branch = github.context.ref.replace('refs/heads/', '')
-    const environment = branch.split('/')[1] || null;
 
-    if (!distributions[environment]) {
-        console.log(`Exiting. No Distribution ID defined for '${environment}'`)
+    const releaseTag = github.context.ref.replace(/^refs\/(heads|tags)\//, '')
+    const [ nulltext1, appEnv, release ] = tag.split('/');
+
+    if (!distributions[appEnv]) {
+        console.log(`Exiting. No Distribution ID defined for '${appEnv}'`)
         return;
     }
 
     // get old configuration
     console.log('Fetching old Distribution')
-    const result = await cloudfront.getDistributionConfig({ Id: distributions[environment] }).promise();
+    const result = await cloudfront.getDistributionConfig({ Id: distributions[appEnv] }).promise();
     const { ETag, DistributionConfig } = result
     
     // upload configuration with new OriginPath
     // For help with this, see ./example-cloudfront-config.json
     // or use aws-spear cloudfront get-distribution-config --id= "<DIST ID>" | tee
     console.log('Updating Distribution');
-    console.log({ originId, project, branch })
+    console.log({ originId, project, releaseTag })
     const originIndex = DistributionConfig.Origins.Items.findIndex(item => item.Id === originId);
     if (originIndex !== -1) {
         console.log('Old Origin Path', DistributionConfig.Origins.Items[originIndex].OriginPath);
-        DistributionConfig.Origins.Items[originIndex].OriginPath = `/${project}/${branch}`;
+        DistributionConfig.Origins.Items[originIndex].OriginPath = `/${project}/${releaseTag}`;
         console.log('New Origin Path', DistributionConfig.Origins.Items[originIndex].OriginPath);
     }
 
     const newConfig = await cloudfront.updateDistribution({
-        Id: distributions[environment],
+        Id: distributions[appEnv],
         IfMatch: ETag,
         DistributionConfig,
     }).promise();
@@ -77,7 +78,7 @@ const handle = async () => {
     // invalidate the cache
     console.log('Invalidating Cache')
     await cloudfront.createInvalidation({
-        DistributionId: distributions[environment],
+        DistributionId: distributions[appEnv],
         InvalidationBatch: {
             Paths: {
                 Quantity: 1, // must match number of entries in "Items"
