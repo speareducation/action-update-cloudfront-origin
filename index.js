@@ -84,7 +84,7 @@ const handle = async () => {
                 Quantity: 1, // must match number of entries in "Items"
                 Items: ['/*'],
             },
-            CallerReference: branch // use release branch as invalidation reference
+            CallerReference: releaseTag // use release branch as invalidation reference
         }
     }).promise();
 
