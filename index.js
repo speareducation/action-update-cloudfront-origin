@@ -2,7 +2,13 @@
 const { CloudFrontClient, GetDistributionCommand, GetDistributionConfigCommand, UpdateDistributionCommand, CreateInvalidationCommand } = require('@aws-sdk/client-cloudfront');
 const core = require('@actions/core');
 const github = require('@actions/github');
-const cloudfront = new CloudFrontClient();
+const cloudfront = new CloudFrontClient({
+    region: process.env.AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+});
 
 const sleep = (seconds) => new Promise(resolve => setTimeout(() => resolve(), seconds * 1000));
 
