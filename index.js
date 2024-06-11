@@ -46,12 +46,12 @@ const handle = async () => {
     const [ nulltext1, appEnv, release ] = releaseTag.split('/');
 
     if (!distributions[appEnv]) {
-        console.log(`Exiting. No Distribution ID defined for '${appEnv}'`)
+        console.log(`Exiting. No Distribution ID defined for '${appEnv}'`);
         return;
     }
 
     // get old configuration
-    console.log('Fetching old Distribution')
+    console.log('Fetching old Distribution', distributions[appEnv]);
     const result = await cloudfront.send(new GetDistributionConfigCommand({ Id: distributions[appEnv] }));
     const { ETag, DistributionConfig } = result
     
