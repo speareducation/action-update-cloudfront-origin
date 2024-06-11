@@ -1,7 +1,8 @@
-const AWS = require('aws-sdk');
+// const AWS = require('aws-sdk');
+const { CloudFrontClient, GetDistributionCommand, GetDistributionConfigCommand, UpdateDistributionCommand, CreateInvalidationCommand } = require('@aws-sdk/client-cloudfront');
 const core = require('@actions/core');
 const github = require('@actions/github');
-const cloudfront = new AWS.CloudFront();
+const cloudfront = new CloudFrontClient();
 
 const sleep = (seconds) => new Promise(resolve => setTimeout(() => resolve(), seconds * 1000));
 
@@ -18,7 +19,7 @@ const isDistributionDeployed = async ({ Id, ETag }) => {
     while ((waitTime -= sleepInterval) >= 0) {
         await sleep(sleepInterval);
         console.log(new Date().toJSON(), `Checking if distribution is deployed`, { Id, ETag, waitTime });
-        const result = await cloudfront.getDistribution({ Id }).promise();
+        const result = await cloudfront.send(new GetDistributionCommand({ Id }));
         if (result.ETag !== ETag) {
             throw new Error('Whoops! It looks like someone else deployed while we were waiting for CloudFront to update.');
         }
@@ -51,7 +52,7 @@ const handle = async () => {
 
     // get old configuration
     console.log('Fetching old Distribution')
-    const result = await cloudfront.getDistributionConfig({ Id: distributions[appEnv] }).promise();
+    const result = await cloudfront.send(new GetDistributionConfigCommand({ Id: distributions[appEnv] }));
     const { ETag, DistributionConfig } = result
     
     // upload configuration with new OriginPath
@@ -66,18 +67,18 @@ const handle = async () => {
         console.log('New Origin Path', DistributionConfig.Origins.Items[originIndex].OriginPath);
     }
 
-    const newConfig = await cloudfront.updateDistribution({
+    const newConfig = await cloudfront.send(new UpdateDistributionCommand({
         Id: distributions[appEnv],
         IfMatch: ETag,
         DistributionConfig,
-    }).promise();
+    }));
 
     // Wait for distribution to be marked as "Deployed",
     await isDistributionDeployed({ Id: newConfig.Distribution.Id, ETag: newConfig.ETag })
 
     // invalidate the cache
     console.log('Invalidating Cache')
-    await cloudfront.createInvalidation({
+    await cloudfront.send(new CreateInvalidationCommand({
         DistributionId: distributions[appEnv],
         InvalidationBatch: {
             Paths: {
@@ -86,7 +87,7 @@ const handle = async () => {
             },
             CallerReference: releaseTag // use release branch as invalidation reference
         }
-    }).promise();
+    }));
 
     console.log('Done!');
 

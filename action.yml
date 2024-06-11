@@ -13,5 +13,5 @@ inputs:
     description: The Project Key, used to build the spear-static-sites path
     required: false
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'index.js'
